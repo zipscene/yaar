@@ -1,0 +1,20 @@
+{
+  "name": "api-router",
+  "version": "0.0.1",
+  "private": true,
+  "description": "API router",
+  "main": "./lib/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git@git.zipscene.com:zsapilibs/api-router.git"
+  },
+  "scripts": {
+    "lint": "node node_modules/zs-linter/scripts/zslint"
+  },
+  "dependencies": {
+    "express": "^4.4.2",
+    "zs-error": "git+ssh://git@git.zipscene.com:zsapicore/zs-error.git#v0.0.3",
+    "zs-linter": "git+ssh://git@git.zipscene.com:zsapicore/zs-linter.git"
+  },
+  "devDependencies": {}
+}
