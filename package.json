@@ -1,6 +1,6 @@
 {
   "name": "api-router",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "private": true,
   "description": "API router",
   "main": "./lib/index.js",
