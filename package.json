@@ -1,6 +1,6 @@
 {
   "name": "api-router",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "private": true,
   "description": "API router",
   "main": "./lib/index.js",
@@ -15,7 +15,7 @@
     "body-parser": "^1.3.0",
     "cors": "^2.3.1",
     "express": "^4.4.2",
-    "zs-error": "git+ssh://git@git.zipscene.com:zsapicore/zs-error.git#v0.0.7",
+    "zs-error": "git+ssh://git@git.zipscene.com:zsapicore/zs-error.git#v0.0.8",
     "zs-linter": "git+ssh://git@git.zipscene.com:zsapicore/zs-linter.git"
   },
   "devDependencies": {}
