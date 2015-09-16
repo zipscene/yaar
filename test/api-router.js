@@ -4,13 +4,21 @@ const expect = require('chai').expect;
 const APIRouter = require('../lib/api-router');
 const HTTPRPCInterface = require('../lib/http-rpc-interface');
 
-// Setup express router
-const app = express();
-const router = new APIRouter();
-const request = supertest(app);
-app.use(router.getExpressRouter());
+let app, router, request;
 
-describe('runCallMiddleware()', function() {
+// Setup express router
+const setupRouter = () => {
+	app = express();
+	router = new APIRouter();
+	request = supertest(app);
+	app.use(router.getExpressRouter());
+
+	router.version(1).addInterface(new HTTPRPCInterface());
+};
+
+describe('APIRouter', function() {
+	beforeEach(setupRouter);
+
 	it('#constructor', function() {
 		expect(router.preRouter).to.be.a('function');
 		expect(router.preRouter.name).to.equal('router');
@@ -24,7 +32,6 @@ describe('runCallMiddleware()', function() {
 
 	it('should add versioned interfaces', function() {
 		router.version(0);
-		router.version(1).addInterface(new HTTPRPCInterface());
 
 		expect(Object.keys(router.versionRouters).length).to.equal(2);
 		expect(router.versionRouters[0].version).to.equal(0);
