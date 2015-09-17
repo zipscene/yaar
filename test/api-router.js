@@ -175,22 +175,58 @@ describe('APIRouter', function() {
 			.then(() => promisifyRequest('/v2/rpc/version-specific', { result: { foo: 'bar' } }));
 	});
 
-	it.skip('should add version-specific methods', function() {
-		router.version(0).addInterface(new HTTPRPCInterface());
-		router.version(1).addInterface(new HTTPRPCInterface());
+	it('should add version-specific methods', function() {
 		router.version(2).addInterface(new HTTPRPCInterface());
 		router.version(3).addInterface(new HTTPRPCInterface());
 		router.version(4).addInterface(new HTTPRPCInterface());
 		router.version(5).addInterface(new HTTPRPCInterface());
 
 		router.register({
-			method: 'version-specific'
+			method: 'single',
+			versions: [ 1, '3' ]
 		}, () => {
-			return { foo: 'bar' };
+			return true;
 		});
 
-		return promisifyRequest('/v1/rpc/version-specific', 500)
-			.then(() => promisifyRequest('/v2/rpc/version-specific', { result: { foo: 'bar' } }));
+		router.register({
+			method: 'ranges',
+			versions: [ '1-2', '4-4' ]
+		}, () => {
+			return true;
+		});
+
+		router.register({
+			method: 'open.ranges',
+			versions: [ '-2', '4-' ]
+		}, () => {
+			return true;
+		});
+
+		router.register({
+			method: 'everything.ever',
+			versions: [ '-1', 3, '4-5' ]
+		}, () => {
+			return true;
+		});
+
+		return promisifyRequest('/v1/rpc/single', { result: true })
+			.then(() => promisifyRequest('/v2/rpc/single', 500))
+			.then(() => promisifyRequest('/v3/rpc/single', { result: true }))
+			.then(() => promisifyRequest('/v1/rpc/ranges', { result: true }))
+			.then(() => promisifyRequest('/v2/rpc/ranges', { result: true }))
+			.then(() => promisifyRequest('/v3/rpc/ranges', 500))
+			.then(() => promisifyRequest('/v4/rpc/ranges', { result: true }))
+			.then(() => promisifyRequest('/v5/rpc/ranges', 500))
+			.then(() => promisifyRequest('/v1/rpc/open/ranges', { result: true }))
+			.then(() => promisifyRequest('/v2/rpc/open/ranges', { result: true }))
+			.then(() => promisifyRequest('/v3/rpc/open/ranges', 500))
+			.then(() => promisifyRequest('/v4/rpc/open/ranges', { result: true }))
+			.then(() => promisifyRequest('/v5/rpc/open/ranges', { result: true }))
+			.then(() => promisifyRequest('/v1/rpc/everything/ever', { result: true }))
+			.then(() => promisifyRequest('/v2/rpc/everything/ever', 500))
+			.then(() => promisifyRequest('/v3/rpc/everything/ever', { result: true }))
+			.then(() => promisifyRequest('/v4/rpc/everything/ever', { result: true }))
+			.then(() => promisifyRequest('/v5/rpc/everything/ever', { result: true }));
 	});
 
 	it('should register pre-middleware', function() {
