@@ -10,7 +10,7 @@ It must be instantiated and used within an application that accepts express rout
 
 ```javascript
 const express = require('express');
-const APIRouter = require('../lib/api-router');
+const APIRouter = require('zs-api-router');
 
 const app = express();
 const router = new APIRouter();
@@ -37,7 +37,7 @@ This returns a `VersionRouter`---a child router on which version-specific method
 Methods are functions defined on routers, accessed via interfaces (as explained below).
 They are registered on the router, with the method name defined in an options object.
 Method names may be semantically sectioned by `.`, which can be utilized or ignored by specific interfaces.
-See the documentation on [`APICallRegistrar#register`](lib/api-call-registrar.js) for an in-depth explanation of all accepted options.
+See the documentation on [APICallRegistrar#register](lib/api-call-registrar.js) for an in-depth explanation of all accepted options.
 
 ```javascript
 router.register({
@@ -45,10 +45,11 @@ router.register({
 }, () => {
 	return 'yay!';
 });
+
+// => { response: 'yay!' }
 ```
 
 As shown above, a return value in a method will be used as a response.
-This route would respond with `{ response: 'yay!' }`, with a status code of `200`.
 
 Errors are sent in a similar fashion.
 
@@ -58,9 +59,21 @@ router.register({
 }, () => {
 	throw new Error('no!');
 });
+
+// => { error: { code: 'internal_error', message: 'no!' } }
 ```
 
-The above method would respond with `{ error: 'no!' }`.
+`XError` instances are explicitly supported, for convenience:
+
+```javascript
+router.register({
+	method: 'not_modified'
+}, () => {
+	throw new XError(XError.NOT_MODIFIED, 'I\'m afraid I can\'t do that.');
+});
+
+// => { error: { code: 'not_modified', message: 'I\'m afraid I can\'t do that.' } }
+```
 
 Methods may also be defined on specific `VersionRouter` instances, rather than the main router.
 Such methods will only be available under the relevant version namespace.
@@ -75,7 +88,7 @@ The supported syntax is as follows:
 ```javascript
 router.register({
 	method: 'everything.ever',
-	versions: [ '-1', 3, '4-5', 7, '9-' ]
+	versions: [ '-1', 3, '4-5', '7', '9-' ]
 }, () => {
 	return true;
 });
@@ -94,6 +107,30 @@ This `versions` option accepts an array with any combination of the following va
 These methods support promises as well.
 Returning a `Promise` from a method will result in a success response if the promise resolves,
 and an error response if the promise rejects.
+
+```javascript
+router.register({
+	method: 'resolve'
+}, () => {
+	return new Promise((resolve) => {
+		setImmediate(() => resolve({ foo: 'bar' }));
+	});
+});
+
+// => { result: { foo: 'bar' } }
+```
+
+```javascript
+router.register({
+	method: 'limit_exceeded'
+}, () => {
+	return new Promise((resolve, reject) => {
+		setImmediate(() => reject(new XError(XError.LIMIT_EXCEEDED, 'STOP DOING THAT!')));
+	});
+});
+
+// => { error: { code: 'limit_exceeded', message: 'STOP DOING THAT!' } }
+```
 
 
 ## Middleware
@@ -171,6 +208,8 @@ versionTwo.addInterface(new SomeAPIInterface());
 
 HTTPRPC is an interface for RPC over HTTP.
 This exposes the methods as routes accessible over HTTP.
+All methods respond with a status code of `200`, whether the responses contain errors or not.
+Methods will respond with a `500` status code if the requested endpoint is not found.
 
 Consider the following method:
 
@@ -195,4 +234,4 @@ router.register({
 });
 ```
 
-See the [`HTTPRPCInterface`](lib/http-rpc-interface.js) file for more information.
+See the [HTTPRPCInterface](lib/http-rpc-interface.js) file for more information.
