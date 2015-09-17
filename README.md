@@ -138,7 +138,7 @@ router.register({
 
 ### APIMiddleware
 
-When you register a method on a router, you are really just defining a single middleware handler.
+When you register a method on a router, you are really just defining a single middleware function.
 Multiple such middleware methods may be defined as follows:
 
 ```javascript
@@ -154,7 +154,18 @@ router.register(
 );
 ```
 
-The `ctx` argument is shared across middleware methods in the same pipeline, and may thus be used for state.
+The `ctx` argument is made up of the following:
+
+- `ctx.req`: The express request.
+- `ctx.res`: The express response.
+- `ctx.method`: The name of the method.
+- `ctx.params`: Parameters to the called method.
+- `ctx.version`: The version of the router on which the method was called.
+- `ctx.result`: The result of the method, if one has been set.
+- `ctx.error`: The error of the method, if one has been set.
+- `ctx.extraErrors`: List of errors that have occurred in PostMiddleware functions.
+
+`ctx` is shared across middleware functions in the same pipeline, and may thus be used for state:
 
 ```javascript
 router.register({
@@ -183,10 +194,11 @@ PreMiddleware may also be defined per-version, by adding them to a `versionRoute
 ### PostMiddleware
 
 PostMiddleware runs before relevant methods.
+Errors in PostMiddleware functions are ignored.
 
 ```javascript
 router.registerPostMiddleware({}, (ctx) => {
-	console.log(`The method ${ctx.method} was just run.`);
+	console.log(`The method ${ctx.method} was just hit.`);
 });
 ```
 
@@ -208,6 +220,7 @@ versionTwo.addInterface(new SomeAPIInterface());
 
 HTTPRPC is an interface for RPC over HTTP.
 This exposes the methods as routes accessible over HTTP.
+All methods are exposed as POST requests, with all method parameters passed in the POST body.
 All methods respond with a status code of `200`, whether the responses contain errors or not.
 Methods will respond with a `500` status code if the requested endpoint is not found.
 
