@@ -17,6 +17,21 @@ const setupRouter = () => {
 	router.version(1).addInterface(new HTTPRPCInterface());
 };
 
+const promisifyRequest = (endpoint, expectedResponse = {}, expectedStatus = 200) => {
+	if (typeof expectedResponse === 'number') {
+		expectedStatus = expectedResponse;
+		expectedResponse = {};
+	}
+
+	return new Promise((resolve, reject) => {
+		request.post(endpoint)
+			.expect(expectedStatus, expectedResponse, (err) => {
+				if (err) return reject(err);
+				resolve();
+			});
+	});
+};
+
 describe('APIRouter', function() {
 	beforeEach(setupRouter);
 
@@ -41,40 +56,37 @@ describe('APIRouter', function() {
 		expect(router.versionRouters[1].interfaces).to.have.length(1);
 	});
 
-	it('#register should support returns', function(done) {
+	it('#register should support returns', function() {
 		router.register({
 			method: 'method'
 		}, () => {
 			return 'some result';
 		});
 
-		request.post('/v1/rpc/method')
-			.expect(200, { result: 'some result' }, done);
+		return promisifyRequest('/v1/rpc/method', { result: 'some result' });
 	});
 
-	it('#register should support errors', function(done) {
+	it('#register should support errors', function() {
 		router.register({
 			method: 'method'
 		}, () => {
 			throw new Error('some error');
 		});
 
-		request.post('/v1/rpc/method')
-			.expect(200, { error: { code: 'internal_error', message: 'some error' } }, done);
+		return promisifyRequest('/v1/rpc/method', { error: { code: 'internal_error', message: 'some error' } });
 	});
 
-	it('#register should support segmented method names', function(done) {
+	it('#register should support segmented method names', function() {
 		router.register({
 			method: 'method.with.long.name'
 		}, () => {
 			return { long: true };
 		});
 
-		request.post('/v1/rpc/method/with/long/name')
-			.expect(200, { result: { long: true } }, done);
+		return promisifyRequest('/v1/rpc/method/with/long/name', { result: { long: true } });
 	});
 
-	it('should support resolving promises in methods', function(done) {
+	it('should support resolving promises in methods', function() {
 		router.register({
 			method: 'resolve'
 		}, () => {
@@ -83,11 +95,10 @@ describe('APIRouter', function() {
 			});
 		});
 
-		request.post('/v1/rpc/resolve')
-			.expect(200, { result: { foo: 'bar' } }, done);
+		return promisifyRequest('/v1/rpc/resolve', { result: { foo: 'bar' } });
 	});
 
-	it('should support rejecting promises in methods', function(done) {
+	it('should support rejecting promises in methods', function() {
 		router.register({
 			method: 'reject'
 		}, () => {
@@ -96,11 +107,10 @@ describe('APIRouter', function() {
 			});
 		});
 
-		request.post('/v1/rpc/reject')
-			.expect(200, { error: { code: 'internal_error', message: 'some error' } }, done);
+		return promisifyRequest('/v1/rpc/reject', { error: { code: 'internal_error', message: 'some error' } });
 	});
 
-	it('should support XErrors', function(done) {
+	it('should support XErrors', function() {
 		router.register({
 			method: 'not_modified'
 		}, () => {
@@ -115,16 +125,15 @@ describe('APIRouter', function() {
 			});
 		});
 
-		request.post('/v1/rpc/not_modified')
-			.expect(200, { error: { code: 'not_modified', message: 'I\'m afraid I can\'t do that.' } }, (err) => {
-				if (err) throw err;
-
-				request.post('/v1/rpc/limit_exceeded')
-					.expect(200, { error: { code: 'limit_exceeded', message: 'STOP DOING THAT!' } }, done);
-			});
+		return promisifyRequest('/v1/rpc/not_modified', {
+			error: { code: 'not_modified', message: 'I\'m afraid I can\'t do that.' }
+		})
+			.then(() => promisifyRequest('/v1/rpc/limit_exceeded', {
+				error: { code: 'limit_exceeded', message: 'STOP DOING THAT!' }
+			}));
 	});
 
-	it('should register methods with middleware', function(done) {
+	it('should register methods with middleware', function() {
 		router.register({
 			method: 'method.with.middleware'
 		}, (ctx) => {
@@ -145,41 +154,46 @@ describe('APIRouter', function() {
 			return { two: 2 };
 		});
 
-		request.post('/v1/rpc/method/with/middleware')
-			.expect(200, { result: { one: 1, two: 2 } }, (err) => {
-				if (err) throw err;
-
-				request.post('/v1/rpc/method/with/skipped/middleware')
-					.expect(200, { result: { one: 1 } }, (err) => {
-						if (err) throw err;
-
-						expect(numEnteredMiddlewares).to.equal(1);
-						done();
-					});
+		return promisifyRequest('/v1/rpc/method/with/middleware', { result: { one: 1, two: 2 } })
+			.then(() => promisifyRequest('/v1/rpc/method/with/skipped/middleware', { result: { one: 1 } }))
+			.then(() => {
+				expect(numEnteredMiddlewares).to.equal(1);
 			});
 	});
 
-	it('should add version-specific methods', function(done) {
+	it('should add methods to VersionRouters', function() {
 		let newRouter = router.version(2);
 		newRouter.addInterface(new HTTPRPCInterface());
 
 		newRouter.register({
-			method: 'version-specific',
-			version: 2
+			method: 'version-specific'
 		}, () => {
 			return { foo: 'bar' };
 		});
 
-		request.post('/v1/rpc/version-specific')
-			.expect(500, (err) => {
-				if (err) throw err;
-
-				request.post('/v2/rpc/version-specific')
-					.expect(200, { result: { foo: 'bar' } }, done);
-			});
+		return promisifyRequest('/v1/rpc/version-specific', 500)
+			.then(() => promisifyRequest('/v2/rpc/version-specific', { result: { foo: 'bar' } }));
 	});
 
-	it('should register pre-middleware', function(done) {
+	it.skip('should add version-specific methods', function() {
+		router.version(0).addInterface(new HTTPRPCInterface());
+		router.version(1).addInterface(new HTTPRPCInterface());
+		router.version(2).addInterface(new HTTPRPCInterface());
+		router.version(3).addInterface(new HTTPRPCInterface());
+		router.version(4).addInterface(new HTTPRPCInterface());
+		router.version(5).addInterface(new HTTPRPCInterface());
+
+		router.register({
+			method: 'version-specific'
+		}, () => {
+			return { foo: 'bar' };
+		});
+
+		return promisifyRequest('/v1/rpc/version-specific', 500)
+			.then(() => promisifyRequest('/v2/rpc/version-specific', { result: { foo: 'bar' } }));
+	});
+
+	it('should register pre-middleware', function() {
 		router.registerPreMiddleware({}, (ctx) => {
 			ctx.someProp = 'foo';
 		});
@@ -190,11 +204,10 @@ describe('APIRouter', function() {
 			return { someProp: ctx.someProp };
 		});
 
-		request.post('/v1/rpc/method/with/pre/middleware')
-			.expect(200, { result: { someProp: 'foo' } }, done);
+		return promisifyRequest('/v1/rpc/method/with/pre/middleware', { result: { someProp: 'foo' } });
 	});
 
-	it('should register post-middleware', function(done) {
+	it('should register post-middleware', function() {
 		let hasRanMiddleware = false;
 		router.registerPostMiddleware({}, () => {
 			hasRanMiddleware = true;
@@ -206,12 +219,9 @@ describe('APIRouter', function() {
 			return 'some response';
 		});
 
-		request.post('/v1/rpc/method/with/post/middleware')
-			.expect(200, (err) => {
-				if (err) throw err;
-
+		return promisifyRequest('/v1/rpc/method/with/post/middleware', { result: 'some response' })
+			.then(() => {
 				expect(hasRanMiddleware).to.be.true;
-				done();
 			});
 	});
 });
