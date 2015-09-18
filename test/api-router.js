@@ -3,6 +3,7 @@ const express = require('express');
 const _ = require('lodash');
 const expect = require('chai').expect;
 const XError = require('xerror');
+const { createSchema } = require('zs-common-schema');
 const APIRouter = require('../lib/api-router');
 const HTTPRPCInterface = require('../lib/http-rpc-interface');
 
@@ -268,5 +269,31 @@ describe('APIRouter', function() {
 			.then(() => {
 				expect(hasRanMiddleware).to.be.true;
 			});
+	});
+
+	it('should normalize params to schema', function() {
+		router.register({
+			method: 'schema',
+			schema: createSchema({ foo: Boolean })
+		}, (ctx) => ctx.params);
+
+		return promisifyRequest(
+			'/v1/rpc/schema',
+			{ params: { foo: 'true' } },
+			{ result: { foo: true } }
+		);
+	});
+
+	it('should create schema instance', function() {
+		router.register({
+			method: 'schema',
+			schema: { foo: Boolean }
+		}, (ctx) => ctx.params);
+
+		return promisifyRequest(
+			'/v1/rpc/schema',
+			{ params: { foo: 'false' } },
+			{ result: { foo: false } }
+		);
 	});
 });
