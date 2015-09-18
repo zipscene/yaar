@@ -271,6 +271,18 @@ describe('APIRouter', function() {
 			});
 	});
 
+	it('should accept params', function() {
+		router.register({
+			method: 'schema'
+		}, (ctx) => ctx.params);
+
+		return promisifyRequest(
+			'/v1/rpc/schema',
+			{ params: { foo: 'bar', baz: 64 } },
+			{ result: { foo: 'bar', baz: 64 } }
+		);
+	});
+
 	it('should normalize params to schema', function() {
 		router.register({
 			method: 'schema',
