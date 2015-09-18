@@ -284,6 +284,47 @@ describe('APIRouter', function() {
 		);
 	});
 
+	it('should accept normalization options', function() {
+		router.register({
+			method: 'no.schema.options',
+			schema: createSchema({ foo: Boolean })
+		}, (ctx) => ctx.params);
+
+		router.register({
+			method: 'schema.options',
+			schema: createSchema({ foo: Boolean }),
+			normalizeOptions: { removeUnknownFields: true }
+		}, (ctx) => ctx.params);
+
+		return promisifyRequest(
+			'/v1/rpc/no/schema/options',
+			{ params: { foo: 'true', bar: 64 } },
+			{
+				error: {
+					code: 'validation_error',
+					data: {
+						fieldErrors: [ {
+							code: 'unknown_field',
+							field: 'bar',
+							message: 'Unknown field'
+						} ]
+					},
+					message: 'Unknown field'
+				}
+			}
+		)
+			.then((err) => {
+				console.log('ERROR', err);
+			})
+			.then(() => {
+				return promisifyRequest(
+					'/v1/rpc/schema/options',
+					{ params: { foo: 'true', bar: 64 } },
+					{ result: { foo: true } }
+				);
+			});
+	});
+
 	it('should create schema instance', function() {
 		router.register({
 			method: 'schema',
