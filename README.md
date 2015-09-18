@@ -5,17 +5,39 @@ An API router to be used by an express application.
 
 ## Basic usage
 
+In this section, we will walk through basic usage for the library.
+
+Instantiate an api router;
+
+```javascript
+const APIRouter = require('zs-api-router');
+const router = new APIRouter();
+```
+
 `zs-api-router` does not listen for or accept connections itself---it is merely a routing layer.
-It must be instantiated and used within an application that accepts express routers, like so:
+It must be used within an application that accepts express routers, like so:
 
 ```javascript
 const express = require('express');
-const APIRouter = require('zs-api-router');
-
 const app = express();
-const router = new APIRouter();
 
 app.use(router.getExpressRouter());
+```
+
+After making a router, create a version and add an interface to it:
+
+```javascript
+router.version(1).addInterface(new HTTPRPCInterface());
+```
+
+Now you can create some methods!
+
+```javascript
+router.register({
+	method: 'some-method'
+}, () => {
+	return 'some response';
+});
 ```
 
 
