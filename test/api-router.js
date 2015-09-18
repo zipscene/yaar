@@ -1,7 +1,9 @@
 const supertest = require('supertest');
 const express = require('express');
+const _ = require('lodash');
 const expect = require('chai').expect;
 const XError = require('xerror');
+const { createSchema } = require('zs-common-schema');
 const APIRouter = require('../lib/api-router');
 const HTTPRPCInterface = require('../lib/http-rpc-interface');
 
@@ -17,15 +19,23 @@ const setupRouter = () => {
 	router.version(1).addInterface(new HTTPRPCInterface());
 };
 
-const promisifyRequest = (endpoint, expectedResponse = {}, expectedStatus = 200) => {
-	if (typeof expectedResponse === 'number') {
-		expectedStatus = expectedResponse;
-		expectedResponse = {};
+const promisifyRequest = (endpoint, options, expectedResponse) => {
+	if (_.isUndefined(expectedResponse) && _.isObject(options)) {
+		expectedResponse = options;
+		options = {};
 	}
+
+	if (_.isUndefined(expectedResponse)) expectedResponse = {};
+	if (_.isNumber(options)) options = { status: options };
+	if (!_.isNumber(options.status)) options.status = 200;
+	if (_.isUndefined(options.params)) options.params = {};
 
 	return new Promise((resolve, reject) => {
 		request.post(endpoint)
-			.expect(expectedStatus, expectedResponse, (err) => {
+			// .set('Accept', 'application/json')
+			.send({ params: options.params })
+			// .expect('Content-Type', /json/)
+			.expect(options.status, expectedResponse, (err) => {
 				if (err) return reject(err);
 				resolve();
 			});
@@ -259,5 +269,84 @@ describe('APIRouter', function() {
 			.then(() => {
 				expect(hasRanMiddleware).to.be.true;
 			});
+	});
+
+	it('should accept params', function() {
+		router.register({
+			method: 'schema'
+		}, (ctx) => ctx.params);
+
+		return promisifyRequest(
+			'/v1/rpc/schema',
+			{ params: { foo: 'bar', baz: 64 } },
+			{ result: { foo: 'bar', baz: 64 } }
+		);
+	});
+
+	it('should normalize params to schema', function() {
+		router.register({
+			method: 'schema',
+			schema: createSchema({ foo: Boolean })
+		}, (ctx) => ctx.params);
+
+		return promisifyRequest(
+			'/v1/rpc/schema',
+			{ params: { foo: 'true' } },
+			{ result: { foo: true } }
+		);
+	});
+
+	it('should accept normalization options', function() {
+		router.register({
+			method: 'no.schema.options',
+			schema: createSchema({ foo: Boolean })
+		}, (ctx) => ctx.params);
+
+		router.register({
+			method: 'schema.options',
+			schema: createSchema({ foo: Boolean }),
+			normalizeOptions: { removeUnknownFields: true }
+		}, (ctx) => ctx.params);
+
+		return promisifyRequest(
+			'/v1/rpc/no/schema/options',
+			{ params: { foo: 'true', bar: 64 } },
+			{
+				error: {
+					code: 'validation_error',
+					data: {
+						fieldErrors: [ {
+							code: 'unknown_field',
+							field: 'bar',
+							message: 'Unknown field'
+						} ]
+					},
+					message: 'Unknown field'
+				}
+			}
+		)
+			.then((err) => {
+				console.log('ERROR', err);
+			})
+			.then(() => {
+				return promisifyRequest(
+					'/v1/rpc/schema/options',
+					{ params: { foo: 'true', bar: 64 } },
+					{ result: { foo: true } }
+				);
+			});
+	});
+
+	it('should create schema instance', function() {
+		router.register({
+			method: 'schema',
+			schema: { foo: Boolean }
+		}, (ctx) => ctx.params);
+
+		return promisifyRequest(
+			'/v1/rpc/schema',
+			{ params: { foo: 'false' } },
+			{ result: { foo: false } }
+		);
 	});
 });

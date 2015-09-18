@@ -102,6 +102,24 @@ Such methods will only be available under the relevant version namespace.
 `VersionRouter#register` functions the same as `APIRouter#register`.
 
 
+### Parameters
+
+As stated above, parameters are exposed as `ctx.params`.
+If a method is registered with a schema, these params will be normalized to it.
+For example:
+
+```javascript
+router.register({
+	method: 'everything.ever',
+	schema: createSchema({ foo: Number })
+}, (ctx) => {
+	return ctx.params;
+});
+```
+
+If the above method were called with parameters `{ foo: '64' }`, the response would be `{ result: { foo: 64 } }`.
+
+
 ### Versions
 
 Methods may be defined to adhere to specific versions.
