@@ -1,0 +1,8 @@
+{
+	"name": "zs-api-router",
+	"description": "ZS Library: zs-api-router",
+	"options": {
+		"outdir": "./docs",
+		"exclude": "dist,tmp,test,node_modules"
+	}
+}
