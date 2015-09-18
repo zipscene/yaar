@@ -1,5 +1,6 @@
 const supertest = require('supertest');
 const express = require('express');
+const _ = require('lodash');
 const expect = require('chai').expect;
 const XError = require('xerror');
 const APIRouter = require('../lib/api-router');
@@ -17,15 +18,23 @@ const setupRouter = () => {
 	router.version(1).addInterface(new HTTPRPCInterface());
 };
 
-const promisifyRequest = (endpoint, expectedResponse = {}, expectedStatus = 200) => {
-	if (typeof expectedResponse === 'number') {
-		expectedStatus = expectedResponse;
-		expectedResponse = {};
+const promisifyRequest = (endpoint, options, expectedResponse) => {
+	if (_.isUndefined(expectedResponse) && _.isObject(options)) {
+		expectedResponse = options;
+		options = {};
 	}
+
+	if (_.isUndefined(expectedResponse)) expectedResponse = {};
+	if (_.isNumber(options)) options = { status: options };
+	if (!_.isNumber(options.status)) options.status = 200;
+	if (_.isUndefined(options.params)) options.params = {};
 
 	return new Promise((resolve, reject) => {
 		request.post(endpoint)
-			.expect(expectedStatus, expectedResponse, (err) => {
+			// .set('Accept', 'application/json')
+			.send({ params: options.params })
+			// .expect('Content-Type', /json/)
+			.expect(options.status, expectedResponse, (err) => {
 				if (err) return reject(err);
 				resolve();
 			});
