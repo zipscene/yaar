@@ -349,4 +349,15 @@ describe('APIRouter', function() {
 			{ result: { foo: false } }
 		);
 	});
+
+	it('should error on invalid schema', function() {
+		let fn = () => {
+			return router.register({
+				method: 'schema',
+				schema: [ 2, 4 ]
+			}, (ctx) => ctx.params);
+		};
+
+		expect(fn).to.throw(XError);
+	});
 });
