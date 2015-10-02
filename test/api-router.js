@@ -325,9 +325,6 @@ describe('APIRouter', function() {
 				}
 			}
 		)
-			.then((err) => {
-				console.log('ERROR', err);
-			})
 			.then(() => {
 				return promisifyRequest(
 					'/v1/rpc/schema/options',
