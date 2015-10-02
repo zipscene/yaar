@@ -3,8 +3,9 @@ const express = require('express');
 const _ = require('lodash');
 const expect = require('chai').expect;
 const XError = require('xerror');
-const APIRouter = require('../lib/api-router');
-const JSONRPCInterface = require('../lib/json-rpc-interface');
+const ZSAPIRouter = require('../lib/index');
+const APIRouter = ZSAPIRouter.APIRouter;
+const JSONRPCInterface = ZSAPIRouter.JSONRPCInterface;
 
 let app, router, request;
 
