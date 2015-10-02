@@ -288,3 +288,31 @@ router.register({
 ```
 
 See the [HTTPRPCInterface](lib/http-rpc-interface.js) file for more information.
+
+### JSONRPC
+
+JSONRPC is an interface for following [JSON RPC standard](http://json-rpc.org/wiki/specification) over HTTP.
+Request posted to `/${verion}/jsonrpc` is handled by this interface. It accept request body like this:
+```js
+{
+	method: 'method.name',
+	id: 'request.id',
+	params: {
+		foo: 'bar'
+	}
+}
+```
+It will always return with HTTP status 200 with following response:
+```js
+{
+	id: 'request.id',
+	result: {
+		key: 'value'
+	},
+	error: {
+		code: 'error code',
+		message: 'some error message'
+	}
+}
+```
+Note field `result` and `error` will not always exist. If an error is returned, `result` field should have an value of `null`. Likewise, `error` will be `null` if `result` is returned.
