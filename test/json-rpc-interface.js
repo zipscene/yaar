@@ -27,13 +27,11 @@ const promisifyRequest = (endpoint, options, expectedResponse) => {
 
 	return new Promise((resolve, reject) => {
 		request.post(endpoint)
-			// .set('Accept', 'application/json')
 			.send({
 				method: options.method,
 				params: options.params,
 				id: options.id
 			})
-			// .expect('Content-Type', /json/)
 			.expect(options.status, expectedResponse, (err) => {
 				if (err) return reject(err);
 				resolve();
@@ -56,7 +54,8 @@ describe('JSONRPCInterface', function() {
 			id: 'someId'
 		}, {
 			result: 'some result',
-			id: 'someId'
+			id: 'someId',
+			error: null
 		});
 	});
 
@@ -72,7 +71,8 @@ describe('JSONRPCInterface', function() {
 			id: 'someId'
 		}, {
 			error: { code: 'internal_error', message: 'some error' },
-			id: 'someId'
+			id: 'someId',
+			result: null
 		});
 	});
 
@@ -88,7 +88,8 @@ describe('JSONRPCInterface', function() {
 			id: 'someId'
 		}, {
 			result: { long: true },
-			id: 'someId'
+			id: 'someId',
+			error: null
 		});
 	});
 
@@ -106,7 +107,8 @@ describe('JSONRPCInterface', function() {
 			id: 'someOtherId'
 		}, {
 			result: { foo: 'bar' },
-			id: 'someOtherId'
+			id: 'someOtherId',
+			error: null
 		});
 	});
 
@@ -124,7 +126,8 @@ describe('JSONRPCInterface', function() {
 			id: 'someId'
 		}, {
 			error: { code: 'internal_error', message: 'some error' },
-			id: 'someId'
+			id: 'someId',
+			result: null
 		});
 	});
 
@@ -148,14 +151,16 @@ describe('JSONRPCInterface', function() {
 			id: 'someId'
 		}, {
 			error: { code: 'not_modified', message: 'I\'m afraid I can\'t do that.' },
-			id: 'someId'
+			id: 'someId',
+			result: null
 		})
 			.then(() => promisifyRequest('/v1/jsonrpc', {
 				method: 'limit_exceeded',
 				id: 'someOtherId'
 			}, {
 				error: { code: 'limit_exceeded', message: 'STOP DOING THAT!' },
-				id: 'someOtherId'
+				id: 'someOtherId',
+				result: null
 			}));
 	});
 
@@ -185,14 +190,16 @@ describe('JSONRPCInterface', function() {
 			id: 'someId'
 		}, {
 			result: { one: 1, two: 2 },
-			id: 'someId'
+			id: 'someId',
+			error: null
 		})
 			.then(() => promisifyRequest('/v1/jsonrpc', {
 				method: 'method.with.skipped.middleware',
 				id: 'someOtherId'
 			}, {
 				result: { one: 1 },
-				id: 'someOtherId'
+				id: 'someOtherId',
+				error: null
 			}))
 			.then(() => {
 				expect(numEnteredMiddlewares).to.equal(1);
@@ -217,14 +224,16 @@ describe('JSONRPCInterface', function() {
 				code: 'not_found',
 				message: `method: version-specific doesn't exist`
 			},
-			id: 'someId'
+			id: 'someId',
+			result: null
 		})
 			.then(() => promisifyRequest('/v2/jsonrpc', {
 				method: 'version-specific',
 				id: 'someOtherId'
 			}, {
 				result: { foo: 'bar' },
-				id: 'someOtherId'
+				id: 'someOtherId',
+				error: null
 			}));
 	});
 
@@ -267,7 +276,8 @@ describe('JSONRPCInterface', function() {
 			id: 1
 		}, {
 			result: true,
-			id: '1'
+			id: '1',
+			error: null
 		})
 			.then(() => promisifyRequest('/v2/jsonrpc', {
 				method: 'single',
@@ -277,28 +287,32 @@ describe('JSONRPCInterface', function() {
 					code: 'not_found',
 					message: `method: single doesn't exist`
 				},
-				id: 'id2'
+				id: 'id2',
+				result: null
 			}))
 			.then(() => promisifyRequest('/v3/jsonrpc', {
 				method: 'single',
 				id: 'id3'
 			}, {
 				result: true,
-				id: 'id3'
+				id: 'id3',
+				error: null
 			}))
 			.then(() => promisifyRequest('/v1/jsonrpc', {
 				method: 'ranges',
 				id: 'id4'
 			}, {
 				result: true,
-				id: 'id4'
+				id: 'id4',
+				error: null
 			}))
 			.then(() => promisifyRequest('/v2/jsonrpc', {
 				method: 'ranges',
 				id: 'id5'
 			}, {
 				result: true,
-				id: 'id5'
+				id: 'id5',
+				error: null
 			}))
 			.then(() => promisifyRequest('/v3/jsonrpc', {
 				method: 'ranges',
@@ -308,14 +322,16 @@ describe('JSONRPCInterface', function() {
 					code: 'not_found',
 					message: `method: ranges doesn't exist`
 				},
-				id: 'id6'
+				id: 'id6',
+				result: null
 			}))
 			.then(() => promisifyRequest('/v4/jsonrpc', {
 				method: 'ranges',
 				id: 'id7'
 			}, {
 				result: true,
-				id: 'id7'
+				id: 'id7',
+				error: null
 			}))
 			.then(() => promisifyRequest('/v5/jsonrpc', {
 				method: 'ranges',
@@ -325,21 +341,24 @@ describe('JSONRPCInterface', function() {
 					code: 'not_found',
 					message: `method: ranges doesn't exist`
 				},
-				id: 'id8'
+				id: 'id8',
+				result: null
 			}))
 			.then(() => promisifyRequest('/v1/jsonrpc', {
 				method: 'open.ranges',
 				id: 'id9'
 			}, {
 				result: true,
-				id: 'id9'
+				id: 'id9',
+				error: null
 			}))
 			.then(() => promisifyRequest('/v2/jsonrpc', {
 				method: 'open.ranges',
 				id: 'id10'
 			}, {
 				result: true,
-				id: 'id10'
+				id: 'id10',
+				error: null
 			}))
 			.then(() => promisifyRequest('/v3/jsonrpc', {
 				method: 'open.ranges',
@@ -349,28 +368,32 @@ describe('JSONRPCInterface', function() {
 					code: 'not_found',
 					message: `method: open.ranges doesn't exist`
 				},
-				id: 'id11'
+				id: 'id11',
+				result: null
 			}))
 			.then(() => promisifyRequest('/v4/jsonrpc', {
 				method: 'open.ranges',
 				id: 'id12'
 			}, {
 				result: true,
-				id: 'id12'
+				id: 'id12',
+				error: null
 			}))
 			.then(() => promisifyRequest('/v5/jsonrpc', {
 				method: 'open.ranges',
 				id: 'id13'
 			}, {
 				result: true,
-				id: 'id13'
+				id: 'id13',
+				error: null
 			}))
 			.then(() => promisifyRequest('/v1/jsonrpc', {
 				method: 'everything.ever',
 				id: 'id14'
 			}, {
 				result: true,
-				id: 'id14'
+				id: 'id14',
+				error: null
 			}))
 			.then(() => promisifyRequest('/v2/jsonrpc', {
 				method: 'everything.ever',
@@ -380,28 +403,32 @@ describe('JSONRPCInterface', function() {
 					code: 'not_found',
 					message: `method: everything.ever doesn't exist`
 				},
-				id: 'id15'
+				id: 'id15',
+				result: null
 			}))
 			.then(() => promisifyRequest('/v3/jsonrpc', {
 				method: 'everything.ever',
 				id: 'id16'
 			}, {
 				result: true,
-				id: 'id16'
+				id: 'id16',
+				error: null
 			}))
 			.then(() => promisifyRequest('/v4/jsonrpc', {
 				method: 'everything.ever',
 				id: 'id17'
 			}, {
 				result: true,
-				id: 'id17'
+				id: 'id17',
+				error: null
 			}))
 			.then(() => promisifyRequest('/v5/jsonrpc', {
 				method: 'everything.ever',
 				id: 'id18'
 			}, {
 				result: true,
-				id: 'id18'
+				id: 'id18',
+				error: null
 			}));
 	});
 
@@ -421,7 +448,8 @@ describe('JSONRPCInterface', function() {
 			id: 'someId'
 		}, {
 			result: { someProp: 'foo' },
-			id: 'someId'
+			id: 'someId',
+			error: null
 		});
 	});
 
@@ -442,7 +470,8 @@ describe('JSONRPCInterface', function() {
 			id: 'someId'
 		}, {
 			result: 'some response',
-			id: 'someId'
+			id: 'someId',
+			error: null
 		})
 			.then(() => {
 				expect(hasRanMiddleware).to.be.true;
@@ -463,7 +492,8 @@ describe('JSONRPCInterface', function() {
 			},
 			{
 				result: { foo: 'bar', baz: 64 },
-				id: 'someId'
+				id: 'someId',
+				error: null
 			}
 		);
 	});

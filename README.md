@@ -10,7 +10,7 @@ In this section, we will walk through basic usage for the library.
 Instantiate an api router;
 
 ```javascript
-const APIRouter = require('zs-api-router');
+const { APIRouter, HTTPRPCInterface } = require('zs-api-router');
 const router = new APIRouter();
 ```
 
