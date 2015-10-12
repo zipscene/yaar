@@ -1,7 +1,7 @@
 const supertest = require('supertest');
 const express = require('express');
 const _ = require('lodash');
-const expect = require('chai').expect;
+const { expect } = require('chai');
 const XError = require('xerror');
 const { createSchema } = require('zs-common-schema');
 const APIRouter = require('../lib/api-router');
@@ -360,28 +360,28 @@ describe('APIRouter', function() {
 
 	it('should normalize response to schema', function() {
 		router.register({
-			method: 'schema',
+			method: 'response.schema.instance',
 			responseSchema: createSchema({ foo: Boolean })
 		}, () => {
 			return { foo: 'true' };
 		});
 
 		return promisifyRequest(
-			'/v1/rpc/schema',
+			'/v1/rpc/response/schema/instance',
 			{ result: { foo: true } }
 		);
 	});
 
 	it('should create response schema instance', function() {
 		router.register({
-			method: 'schema',
+			method: 'response.schema.instance',
 			responseSchema: { foo: Boolean }
 		}, () => {
 			return { foo: 'true' };
 		});
 
 		return promisifyRequest(
-			'/v1/rpc/schema',
+			'/v1/rpc/response/schema/instance',
 			{ result: { foo: true } }
 		);
 	});
