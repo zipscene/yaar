@@ -1,11 +1,10 @@
 const supertest = require('supertest');
 const express = require('express');
 const _ = require('lodash');
-const expect = require('chai').expect;
+const { expect } = require('chai');
 const XError = require('xerror');
-const ZSAPIRouter = require('../lib/index');
-const APIRouter = ZSAPIRouter.APIRouter;
-const JSONRPCInterface = ZSAPIRouter.JSONRPCInterface;
+const { createSchema } = require('zs-common-schema');
+const { APIRouter, JSONRPCInterface } = require('../lib/index');
 
 let app, router, request;
 
@@ -490,8 +489,7 @@ describe('JSONRPCInterface', function() {
 				method: 'schema',
 				id: 'someId',
 				params: { foo: 'bar', baz: 64 }
-			},
-			{
+			}, {
 				result: { foo: 'bar', baz: 64 },
 				id: 'someId',
 				error: null
@@ -499,4 +497,45 @@ describe('JSONRPCInterface', function() {
 		);
 	});
 
+	it('should normalize response to schema', function() {
+		router.register({
+			method: 'result.schema',
+			responseSchema: createSchema({ foo: Boolean })
+		}, () => {
+			return { foo: 'true' };
+		});
+
+		return promisifyRequest(
+			'/v1/jsonrpc',
+			{
+				method: 'result.schema',
+				id: 'someId'
+			}, {
+				result: { foo: true },
+				id: 'someId',
+				error: null
+			}
+		);
+	});
+
+	it('should create response schema instance', function() {
+		router.register({
+			method: 'result.schema.instance',
+			responseSchema: { foo: Boolean }
+		}, () => {
+			return { foo: 'true' };
+		});
+
+		return promisifyRequest(
+			'/v1/jsonrpc',
+			{
+				method: 'result.schema.instance',
+				id: 'someId'
+			}, {
+				result: { foo: true },
+				id: 'someId',
+				error: null
+			}
+		);
+	});
 });
