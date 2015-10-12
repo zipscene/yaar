@@ -4,7 +4,7 @@ const _ = require('lodash');
 const { expect } = require('chai');
 const XError = require('xerror');
 const { createSchema } = require('zs-common-schema');
-const { APIRouter, JSONRPCInterface } = require('../lib/index');
+const { APIRouter, JSONRPCInterface } = require('../lib');
 
 let app, router, request;
 
