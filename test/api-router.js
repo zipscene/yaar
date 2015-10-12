@@ -357,4 +357,32 @@ describe('APIRouter', function() {
 
 		expect(fn).to.throw(XError);
 	});
+
+	it('should normalize response to schema', function() {
+		router.register({
+			method: 'schema',
+			responseSchema: createSchema({ foo: Boolean })
+		}, () => {
+			return { foo: 'true' };
+		});
+
+		return promisifyRequest(
+			'/v1/rpc/schema',
+			{ result: { foo: true } }
+		);
+	});
+
+	it('should create response schema instance', function() {
+		router.register({
+			method: 'schema',
+			responseSchema: { foo: Boolean }
+		}, () => {
+			return { foo: 'true' };
+		});
+
+		return promisifyRequest(
+			'/v1/rpc/schema',
+			{ result: { foo: true } }
+		);
+	});
 });
