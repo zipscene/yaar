@@ -59,6 +59,21 @@ describe('JSONRPCInterface', function() {
 		});
 	});
 
+	it('#regiester should support empty id', function() {
+		router.register({
+			method: 'method'
+		}, () => {
+			return 'some result';
+		});
+
+		return promisifyRequest('/v1/jsonrpc', {
+			method: 'method'
+		}, {
+			result: 'some result',
+			error: null
+		});
+	});
+
 	it('#register should support errors', function() {
 		router.register({
 			method: 'method'
