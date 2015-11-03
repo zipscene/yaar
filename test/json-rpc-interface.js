@@ -553,4 +553,22 @@ describe('JSONRPCInterface', function() {
 			}
 		);
 	});
+
+	it('should allow manual responses', function() {
+		router.register({
+			method: 'manual.response',
+			manualResponse: true
+		}, (ctx) => {
+			ctx.res.status(200).send('abcd');
+		});
+
+		return promisifyRequest(
+			'/v1/jsonrpc',
+			{
+				method: 'manual.response',
+				id: 'someId'
+			},
+			'abcd'
+		);
+	});
 });
