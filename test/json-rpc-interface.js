@@ -512,6 +512,26 @@ describe('JSONRPCInterface', function() {
 		);
 	});
 
+	it('should normalize params to schema', function() {
+		router.register({
+			method: 'schema',
+			schema: createSchema({ foo: Boolean, bar: Number })
+		}, (ctx) => ctx.params);
+
+		return promisifyRequest(
+			'/v1/jsonrpc',
+			{
+				method: 'schema',
+				id: 'someId',
+				params: { foo: 'true' }
+			}, {
+				result: { foo: true },
+				id: 'someId',
+				error: null
+			}
+		);
+	});
+
 	it('should normalize response to schema', function() {
 		router.register({
 			method: 'result.schema',

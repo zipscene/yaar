@@ -264,7 +264,7 @@ describe('HTTPRPCInterface', function() {
 	it('should normalize params to schema', function() {
 		router.register({
 			method: 'schema',
-			schema: createSchema({ foo: Boolean })
+			schema: createSchema({ foo: Boolean, bar: Number })
 		}, (ctx) => ctx.params);
 
 		return promisifyRequest(
