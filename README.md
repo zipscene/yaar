@@ -316,3 +316,13 @@ It will always return with HTTP status 200 with following response:
 }
 ```
 Note field `result` and `error` will not always exist. If an error is returned, `result` field should have an value of `null`. Likewise, `error` will be `null` if `result` is returned.
+
+Some extra options on the register object for JSONRPC:
+
+- manualResponse: If set, and no route middlewares throw an error, no request will automatically be sent.
+  The final middleware will be expected to directly manipulate the res object to construct the response.
+- streamingResponse: Use this option to stream a large number of objects back to the client. If set, the final route
+  middleware is expected to return a readable zstream instance containing the response data. Data from this stream
+  will be converted into newline-separated JSON and written to the response. Once the stream terminates, a final
+  special object will be written, containing a boolean flag `success` that indicates whether or not an error was
+  thrown by the stream, and the error if applicable.

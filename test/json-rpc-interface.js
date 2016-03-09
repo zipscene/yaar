@@ -5,6 +5,7 @@ const { expect } = require('chai');
 const XError = require('xerror');
 const { createSchema } = require('zs-common-schema');
 const { APIRouter, JSONRPCInterface } = require('../lib');
+const zstreams = require('zstreams');
 
 let app, router, request;
 
@@ -589,6 +590,30 @@ describe('JSONRPCInterface', function() {
 				id: 'someId'
 			},
 			'abcd'
+		);
+	});
+
+	it('should allow streaming responses', function() {
+		router.register({
+			method: 'streaming.response',
+			streamingResponse: true
+		}, () => {
+			return Promise.resolve(
+				zstreams.fromArray([ 'foo', 'bar\n', { foo: 'bar' } ])
+			);
+		});
+
+		return promisifyRequest(
+			'/v1/jsonrpc',
+			{
+				method: 'streaming.response',
+				id: 'YATTA'
+			}, [
+				'foo',
+				'bar',
+				'{"foo":"bar"}',
+				'{"success":true}'
+			].join('\n') + '\n'
 		);
 	});
 });
