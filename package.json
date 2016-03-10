@@ -22,7 +22,8 @@
     "lodash": "^3.10.1",
     "pasync": "^1.4.0",
     "xerror": "^1.0.0",
-    "zs-common-schema": "^1.5.0"
+    "zs-common-schema": "^1.5.0",
+    "zstreams": "^3.2.2"
   },
   "devDependencies": {
     "broccoli": "^0.16.7",
@@ -37,8 +38,7 @@
     "mocha": "^2.2.5",
     "source-map-support": "^0.3.2",
     "supertest": "^1.1.0",
-    "yuidocjs": "^0.9.0",
-    "zstreams": "^3.2.2"
+    "yuidocjs": "^0.9.0"
   },
   "publishConfig": {
     "registry": "https://npm.zipscene.com/"

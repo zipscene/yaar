@@ -326,3 +326,8 @@ Some extra options on the register object for JSONRPC:
   will be converted into newline-separated JSON and written to the response. Once the stream terminates, a final
   special object will be written, containing a boolean flag `success` that indicates whether or not an error was
   thrown by the stream, and the error if applicable.
+- streamKeepAlive: If this and streamingResponse are both set, the router will automatically insert the object
+  {"streamKeepAlive":true} into the response stream every 10 seconds, in order to force the TCP connection to stay
+  open. These objects must be ignored by the client.
+- endStreamOnConnectionClose: When set in streamingResponse mode, the router will emit an error event on the response
+- stream if the connection prematurely closes, forcing a zstreams cleanup.
