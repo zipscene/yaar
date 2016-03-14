@@ -21,6 +21,7 @@
     "express": "^4.13.3",
     "lodash": "^3.10.1",
     "pasync": "^1.4.0",
+    "request": "^2.69.0",
     "xerror": "^1.0.0",
     "zs-common-schema": "^1.5.0",
     "zstreams": "^3.2.2"
