@@ -673,4 +673,80 @@ describe('JSONRPCInterface', function() {
 
 		return waiter.promise;
 	});
+
+	it('should emit router events', function() {
+		let waiter = pasync.waiter();
+		let state = 'waiting';
+
+		router.register({
+			method: 'ez.route'
+		}, () => {
+			return { foo: 'true' };
+		});
+
+		router.on('request-begin', (ctx) => {
+			if (ctx.method !== 'ez.route' || state !== 'waiting') {
+				return waiter.reject(new Error('wat'));
+			}
+			state = 'begin';
+		});
+		router.on('request-end', (ctx) => {
+			if (ctx.method !== 'ez.route' || state !== 'begin') {
+				return waiter.reject(new Error('literally wat'));
+			}
+			waiter.resolve();
+		});
+		router.on('request-error', (ctx, error) => {
+			return waiter.reject(error);
+		});
+
+		request.post('/v1/jsonrpc')
+			.send({
+				method: 'ez.route',
+				params: {}
+			})
+			.end(function() {});
+
+		return waiter.promise;
+	});
+
+	it('should emit router events, streaming edition', function() {
+		let waiter = pasync.waiter();
+		let state = 'waiting';
+
+		router.register({
+			method: 'ez.route.stream',
+			streamingResponse: true
+		}, () => {
+			return Promise.resolve(
+				zstreams.fromArray([ 'foo', 'bar\n', { foo: 'bar' } ])
+			);
+		});
+
+		router.on('request-begin', (ctx) => {
+			if (ctx.method !== 'ez.route.stream' || state !== 'waiting') {
+				return waiter.reject(new Error('wat'));
+			}
+			state = 'begin';
+		});
+		router.on('request-end', (ctx) => {
+			if (ctx.method !== 'ez.route.stream' || state !== 'begin') {
+				return waiter.reject(new Error('literally wat'));
+			}
+			waiter.resolve();
+		});
+		router.on('request-error', (ctx, error) => {
+			return waiter.reject(error);
+		});
+
+		request.post('/v1/jsonrpc')
+			.send({
+				method: 'ez.route.stream',
+				params: {}
+			})
+			.end(function() {});
+
+		return waiter.promise;
+	});
+
 });

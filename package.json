@@ -18,6 +18,7 @@
     "babel-runtime": "5.8.20",
     "body-parser": "^1.13.3",
     "cors": "^2.7.1",
+    "crisphooks": "^2.0.0",
     "express": "^4.13.3",
     "lodash": "^3.10.1",
     "pasync": "^1.4.0",

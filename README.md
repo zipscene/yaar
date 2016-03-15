@@ -40,6 +40,20 @@ router.register({
 });
 ```
 
+The APIRouter class is a CrispHooks emitter, and emits several events during the course of a request:
+
+```javascript
+	router.on('request-begin', function(ctx) {
+		console.log('Request placed to ' + ctx.method);
+	});
+	router.on('request-end', function(ctx) {
+		console.log('Request to ' + ctx.method + ' completed');
+	});
+	router.on('request-error', function(ctx, error) {
+		console.log('Request to ' + ctx.method + ' failed unexpectedly:');
+		console.log(error);
+	});
+```
 
 ## Versions
 
