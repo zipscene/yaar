@@ -40,6 +40,20 @@ router.register({
 });
 ```
 
+The APIRouter class is a CrispHooks emitter, and emits several events during the course of a request:
+
+```javascript
+	router.on('request-begin', function(ctx) {
+		console.log('Request placed to ' + ctx.method);
+	});
+	router.on('request-end', function(ctx) {
+		console.log('Request to ' + ctx.method + ' completed');
+	});
+	router.on('request-error', function(ctx, error) {
+		console.log('Request to ' + ctx.method + ' failed unexpectedly:');
+		console.log(error);
+	});
+```
 
 ## Versions
 
@@ -316,3 +330,19 @@ It will always return with HTTP status 200 with following response:
 }
 ```
 Note field `result` and `error` will not always exist. If an error is returned, `result` field should have an value of `null`. Likewise, `error` will be `null` if `result` is returned.
+
+Some extra options on the register object for JSONRPC:
+
+- manualResponse: If set, and no route middlewares throw an error, no response will automatically be sent.
+  The final middleware will be expected to directly manipulate the res object to construct the response.
+- streamingResponse: Use this option to stream a large number of objects back to the client. If set, the final route
+  middleware is expected to return a readable object stream containing the response data, or a promise
+  resolving with such a stream. Data from this stream
+  will be converted into newline-separated JSON and written to the response. Once the stream terminates, a final
+  special object will be written, containing a boolean flag `success` that indicates whether or not an error was
+  thrown by the stream, and the error if applicable.
+- streamKeepAlive: If this and streamingResponse are both set, the router will automatically insert the object
+  {"keepAlive":true} into the response stream every 10 seconds, in order to force the TCP connection to stay
+  open. These objects must be ignored by the client.
+- endStreamOnConnectionClose: When set in streamingResponse mode, the router will emit an error event on the response
+- stream if the connection prematurely closes, forcing a zstreams cleanup.

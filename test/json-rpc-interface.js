@@ -5,6 +5,9 @@ const { expect } = require('chai');
 const XError = require('xerror');
 const { createSchema } = require('zs-common-schema');
 const { APIRouter, JSONRPCInterface } = require('../lib');
+const zstreams = require('zstreams');
+const pasync = require('pasync');
+const http = require('http');
 
 let app, router, request;
 
@@ -591,4 +594,159 @@ describe('JSONRPCInterface', function() {
 			'abcd'
 		);
 	});
+
+	it('should allow streaming responses', function() {
+		router.register({
+			method: 'streaming.response',
+			streamingResponse: true,
+			endStreamOnConnectionClose: true
+		}, () => {
+			return Promise.resolve(
+				zstreams.fromArray([ 'foo', 'bar\n', { foo: 'bar' } ])
+			);
+		});
+
+		return promisifyRequest(
+			'/v1/jsonrpc',
+			{
+				method: 'streaming.response',
+				id: 'YATTA'
+			}, [
+				'foo',
+				'bar',
+				'{"foo":"bar"}',
+				'{"success":true}'
+			].join('\n') + '\n'
+		);
+	});
+
+	it('should close response stream when connection dies', function() {
+		let waiter = pasync.waiter();
+
+		router.register({
+			method: 'streaming.response.end',
+			streamingResponse: true,
+			endStreamOnConnectionClose: true
+		}, () => {
+			let stream = new zstreams.PassThrough({
+				objectMode: true
+			});
+			stream.on('chainerror', (error) => {
+				waiter.reject(error);
+			});
+			stream.on('end', () => {
+				waiter.resolve();
+			});
+			stream.write({ foo: 'YATTA' });
+			return Promise.resolve(stream.pipe(new zstreams.PassThrough({
+				objectMode: true
+			})));
+		});
+
+		// Real life request!
+		app.listen(17113, function(error) {
+			if (error) throw error;
+
+			let postData = JSON.stringify({
+				method: 'streaming.response.end',
+				params: {}
+			});
+			let req = http.request({
+				method: 'POST',
+				host: 'localhost',
+				port: 17113,
+				path: '/v1/jsonrpc',
+				headers: {
+					'Content-Type': 'application/json',
+					'Content-Length': postData.length
+				}
+			}, () => {
+				setTimeout(() => {
+					req.abort();
+				}, 500);
+			});
+
+			req.write(postData);
+			req.end();
+		});
+
+
+		return waiter.promise;
+	});
+
+	it('should emit router events', function() {
+		let waiter = pasync.waiter();
+		let state = 'waiting';
+
+		router.register({
+			method: 'ez.route'
+		}, () => {
+			return { foo: 'true' };
+		});
+
+		router.on('request-begin', (ctx) => {
+			if (ctx.method !== 'ez.route' || state !== 'waiting') {
+				return waiter.reject(new Error('wat'));
+			}
+			state = 'begin';
+		});
+		router.on('request-end', (ctx) => {
+			if (ctx.method !== 'ez.route' || state !== 'begin') {
+				return waiter.reject(new Error('literally wat'));
+			}
+			waiter.resolve();
+		});
+		router.on('request-error', (ctx, error) => {
+			return waiter.reject(error);
+		});
+
+		request.post('/v1/jsonrpc')
+			.send({
+				method: 'ez.route',
+				params: {}
+			})
+			.end(function() {});
+
+		return waiter.promise;
+	});
+
+	it('should emit router events, streaming edition', function() {
+		let waiter = pasync.waiter();
+		let state = 'waiting';
+
+		router.register({
+			method: 'ez.route.stream',
+			streamingResponse: true
+		}, () => {
+			return Promise.resolve(
+				zstreams.fromArray([ 'foo', 'bar\n', { foo: 'bar' } ])
+			);
+		});
+
+		router.on('request-begin', (ctx) => {
+			if (ctx.method !== 'ez.route.stream' || state !== 'waiting') {
+				return waiter.reject(new Error('wat'));
+			}
+			state = 'begin';
+		});
+		router.on('request-end', (ctx) => {
+			if (ctx.method !== 'ez.route.stream' || state !== 'begin') {
+				return waiter.reject(new Error('literally wat'));
+			}
+			waiter.resolve();
+		});
+		router.on('request-error', (ctx, error) => {
+			return waiter.reject(error);
+		});
+
+		request.post('/v1/jsonrpc')
+			.send({
+				method: 'ez.route.stream',
+				params: {}
+			})
+			.end(function() {});
+
+		return waiter.promise;
+	});
+
 });
