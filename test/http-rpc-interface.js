@@ -378,4 +378,13 @@ describe('HTTPRPCInterface', function() {
 			'abcd'
 		);
 	});
+
+	it('should include register options as routeOptions on context', function() {
+		let options = { method: 'route.options' };
+		router.register(options, (ctx) => {
+			return ctx.routeOptions;
+		});
+
+		return promisifyRequest('/v1/rpc/route/options', { result: options });
+	});
 });

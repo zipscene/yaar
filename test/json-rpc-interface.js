@@ -749,4 +749,24 @@ describe('JSONRPCInterface', function() {
 		return waiter.promise;
 	});
 
+	it('should include register options as routeOptions on context', function() {
+		let options = { method: 'route.options' };
+		router.register(options, (ctx) => {
+			return ctx.routeOptions;
+		});
+
+		return promisifyRequest(
+			'/v1/jsonrpc',
+			{
+				method: 'route.options',
+				id: 'asdf'
+			},
+			{
+				id: 'asdf',
+				result: options,
+				error: null
+			}
+		);
+	});
+
 });
