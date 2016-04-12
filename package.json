@@ -24,7 +24,7 @@
     "pasync": "^1.4.0",
     "request": "^2.69.0",
     "xerror": "^1.0.0",
-    "zs-common-schema": "^1.5.0",
+    "zs-common-schema": "^1.7.7",
     "zstreams": "^3.2.2"
   },
   "devDependencies": {
