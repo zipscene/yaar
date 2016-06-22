@@ -1,6 +1,6 @@
 {
   "name": "zs-api-router",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "description": "ZS Library: zs-api-router",
   "main": "./dist/lib/index.js",
   "repository": {
