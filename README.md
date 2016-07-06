@@ -343,4 +343,3 @@ Some extra options on the register object for JSONRPC:
   thrown by the stream, and the error if applicable.
 - `keepAlive`: If set, and manualResponse is not set, the router will periodically insert a space into the response during downtime, in order to keep the connection open. Defaults to true.
 - `keepAliveInterval`: Specifies the length of time in ms to wait before sending a keep-alive space. Defaults to 10 seconds.
-- `endStreamOnConnectionClose`: When set in streamingResponse mode, the router will emit an error event on the response stream if the connection prematurely closes, forcing a zstreams cleanup.
