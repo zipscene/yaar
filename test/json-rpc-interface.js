@@ -598,8 +598,7 @@ describe('JSONRPCInterface', function() {
 	it('should allow streaming responses', function() {
 		router.register({
 			method: 'streaming.response',
-			streamingResponse: true,
-			endStreamOnConnectionClose: true
+			streamingResponse: true
 		}, () => {
 			return Promise.resolve(
 				zstreams.fromArray([ 'foo', 'bar\n', { foo: 'bar' } ])
@@ -625,8 +624,7 @@ describe('JSONRPCInterface', function() {
 
 		router.register({
 			method: 'streaming.response.end',
-			streamingResponse: true,
-			endStreamOnConnectionClose: true
+			streamingResponse: true
 		}, () => {
 			let stream = new zstreams.PassThrough({
 				objectMode: true
