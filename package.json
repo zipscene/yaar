@@ -1,6 +1,6 @@
 {
   "name": "zs-api-router",
-  "version": "1.4.6",
+  "version": "1.4.7",
   "description": "ZS Library: zs-api-router",
   "main": "./dist/lib/index.js",
   "repository": {
@@ -24,7 +24,7 @@
     "pasync": "^1.4.0",
     "request": "^2.69.0",
     "xerror": "^1.0.0",
-    "zs-common-schema": "^1.7.7",
+    "zs-common-schema": "^1.8.0",
     "zstreams": "^3.2.2"
   },
   "devDependencies": {
