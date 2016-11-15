@@ -1,9 +1,13 @@
+// Copyright 2016 Zipscene, LLC
+// Licensed under the Apache License, Version 2.0
+// http://www.apache.org/licenses/LICENSE-2.0
+
 const supertest = require('supertest');
 const express = require('express');
 const _ = require('lodash');
 const { expect } = require('chai');
 const XError = require('xerror');
-const { createSchema } = require('zs-common-schema');
+const { createSchema } = require('common-schema');
 const { APIRouter, HTTPRPCInterface } = require('../lib');
 
 let app, router, request;

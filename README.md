@@ -1,4 +1,4 @@
-# zs-api-router
+# yaar
 
 An API router to be used by an express application.
 
@@ -10,11 +10,11 @@ In this section, we will walk through basic usage for the library.
 Instantiate an api router;
 
 ```javascript
-const { APIRouter, HTTPRPCInterface } = require('zs-api-router');
+const { APIRouter, HTTPRPCInterface } = require('yaar');
 const router = new APIRouter();
 ```
 
-`zs-api-router` does not listen for or accept connections itself---it is merely a routing layer.
+`yaar` does not listen for or accept connections itself---it is merely a routing layer.
 It must be used within an application that accepts express routers, like so:
 
 ```javascript
@@ -57,7 +57,7 @@ The APIRouter class is a CrispHooks emitter, and emits several events during the
 
 ## Versions
 
-`zs-api-router` allows for routes to be namespaced by version.
+`yaar` allows for routes to be namespaced by version.
 To create a version, run:
 
 ```javascript

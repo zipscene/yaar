@@ -1,12 +1,16 @@
 {
-  "name": "zs-api-router",
+  "name": "yaar",
   "version": "1.4.7",
-  "description": "ZS Library: zs-api-router",
+  "description": "Yet Another API Router",
   "main": "./dist/lib/index.js",
   "repository": {
     "type": "git",
-    "url": "git@git.zipscene.com:zsapilibs/zs-api-router.git"
+    "url": "https://github.com/zipscene/yaar.git"
   },
+  "keywords": [
+    "api",
+    "router"
+  ],
   "scripts": {
     "lint": "node ./node_modules/.bin/eslint . || exit 0",
     "docs": "node ./node_modules/.bin/yuidoc .",
@@ -24,8 +28,8 @@
     "pasync": "^1.4.0",
     "request": "^2.69.0",
     "xerror": "^1.0.0",
-    "zs-common-schema": "^1.8.0",
-    "zstreams": "^3.2.2"
+    "zstreams": "^3.2.2",
+    "common-schema": "^1.8.0"
   },
   "devDependencies": {
     "broccoli": "^0.16.7",
@@ -42,7 +46,5 @@
     "supertest": "^1.1.0",
     "yuidocjs": "^0.9.0"
   },
-  "publishConfig": {
-    "registry": "https://npm.zipscene.com/"
-  }
+  "license": "Apache-2.0"
 }

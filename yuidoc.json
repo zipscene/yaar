@@ -1,6 +1,6 @@
 {
-	"name": "zs-api-router",
-	"description": "ZS Library: zs-api-router",
+	"name": "yaar",
+	"description": "ZS Library: yaar",
 	"options": {
 		"outdir": "./docs",
 		"exclude": "dist,tmp,test,node_modules"
