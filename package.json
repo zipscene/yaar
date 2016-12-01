@@ -21,15 +21,16 @@
   "dependencies": {
     "babel-runtime": "5.8.20",
     "body-parser": "^1.13.3",
+    "common-schema": "^1.8.0",
     "cors": "^2.7.1",
     "crisphooks": "^2.0.0",
     "express": "^4.13.3",
     "lodash": "^3.10.1",
+    "objtools": "^1.6.2",
     "pasync": "^1.4.0",
     "request": "^2.69.0",
     "xerror": "^1.0.0",
-    "zstreams": "^3.2.2",
-    "common-schema": "^1.8.0"
+    "zstreams": "^3.2.2"
   },
   "devDependencies": {
     "broccoli": "^0.16.7",

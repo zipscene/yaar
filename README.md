@@ -343,3 +343,9 @@ Some extra options on the register object for JSONRPC:
   thrown by the stream, and the error if applicable.
 - `keepAlive`: If set, and manualResponse is not set, the router will periodically insert a space into the response during downtime, in order to keep the connection open. Defaults to true.
 - `keepAliveInterval`: Specifies the length of time in ms to wait before sending a keep-alive space. Defaults to 10 seconds.
+
+## API Info
+
+Yaar be implementin' yer API routes fer gettin' thar method infarrmation.  Just call `APIRouter#registerAPIInfoRoute()` and thar be
+treasure called the "api-info" method.
+
