@@ -19,13 +19,14 @@ const objtools = require('objtools');
 const request = require('request');
 chai.use(sinonChai);
 
-let app, router, superRequest;
+let app, router, superRequest, server;
 
 // Setup express router
 const setupRouter = () => {
 	app = express();
 	router = new APIRouter();
 	superRequest = supertest(app);
+	server = null;
 	app.use(router.getExpressRouter());
 
 	router.version(1).addInterface(new JSONRPCInterface());
@@ -54,6 +55,14 @@ const promisifyRequest = (endpoint, options, expectedResponse) => {
 
 describe('JSONRPCInterface', function() {
 	beforeEach(setupRouter);
+
+	afterEach(function(done) {
+		if (server) {
+			server.close(done);
+		} else {
+			done();
+		}
+	});
 
 	it('#register should support returns', function() {
 		router.register({
@@ -652,7 +661,7 @@ describe('JSONRPCInterface', function() {
 		});
 
 		// Real life request!
-		app.listen(17113, function(error) {
+		server = app.listen(17113, function(error) {
 			if (error) throw error;
 
 			let postData = JSON.stringify({
@@ -777,16 +786,18 @@ describe('JSONRPCInterface', function() {
 		);
 	});
 
-	it.only('should trigger connection-closed hook on context', function(done) {
+	it('should trigger connection-closed hook on context', function(done) {
 		let spy = sinon.spy();
 
-		router.register({ method: 'do.the.thing' }, () => {
+		router.register({ method: 'do.the.thing' }, (ctx) => {
+			ctx.hook('connection-closed', spy);
+
 			// Will wait indefinitely until aborted.
 			return pasync.waiter().promise;
 		});
 
 		// Real life request!
-		app.listen(17113, function(error) {
+		server = app.listen(17113, function(error) {
 			if (error) throw error;
 
 			let req = request({
@@ -800,18 +811,17 @@ describe('JSONRPCInterface', function() {
 					params: {}
 				})
 			}, (err, httpResponse, body) => {
-				console.log(body);
-				done();
+				throw new Error('Request should have been aborted.');
 			});
 
 			setTimeout(() => {
 				req.abort();
-			}, 500);
 
-			req.on('abort', function() {
-				expect(spy).to.be.calledOnce;
-				done();
-			});
+				setTimeout(() => {
+					expect(spy).to.be.calledOnce;
+					done();
+				}, 100);
+			}, 100);
 		});
 	});
 
