@@ -15,7 +15,6 @@ const { APIRouter, JSONRPCInterface } = require('../lib');
 const zstreams = require('zstreams');
 const pasync = require('pasync');
 const http = require('http');
-const objtools = require('objtools');
 const request = require('request');
 chai.use(sinonChai);
 
@@ -810,7 +809,7 @@ describe('JSONRPCInterface', function() {
 					method: 'do.the.thing',
 					params: {}
 				})
-			}, (err, httpResponse, body) => {
+			}, () => {
 				throw new Error('Request should have been aborted.');
 			});
 
