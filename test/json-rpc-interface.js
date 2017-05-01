@@ -5,21 +5,27 @@
 const supertest = require('supertest');
 const express = require('express');
 const _ = require('lodash');
-const { expect } = require('chai');
+const chai = require('chai');
+const { expect } = chai;
+const sinon = require('sinon');
+const sinonChai = require('sinon-chai');
 const XError = require('xerror');
 const { createSchema } = require('common-schema');
 const { APIRouter, JSONRPCInterface } = require('../lib');
 const zstreams = require('zstreams');
 const pasync = require('pasync');
 const http = require('http');
+const request = require('request');
+chai.use(sinonChai);
 
-let app, router, request;
+let app, router, superRequest, server;
 
 // Setup express router
 const setupRouter = () => {
 	app = express();
 	router = new APIRouter();
-	request = supertest(app);
+	superRequest = supertest(app);
+	server = null;
 	app.use(router.getExpressRouter());
 
 	router.version(1).addInterface(new JSONRPCInterface());
@@ -33,7 +39,7 @@ const promisifyRequest = (endpoint, options, expectedResponse) => {
 	if (_.isUndefined(options.params)) options.params = {};
 
 	return new Promise((resolve, reject) => {
-		request.post(endpoint)
+		superRequest.post(endpoint)
 			.send({
 				method: options.method,
 				params: options.params,
@@ -48,6 +54,14 @@ const promisifyRequest = (endpoint, options, expectedResponse) => {
 
 describe('JSONRPCInterface', function() {
 	beforeEach(setupRouter);
+
+	afterEach(function(done) {
+		if (server) {
+			server.close(done);
+		} else {
+			done();
+		}
+	});
 
 	it('#register should support returns', function() {
 		router.register({
@@ -646,7 +660,7 @@ describe('JSONRPCInterface', function() {
 		});
 
 		// Real life request!
-		app.listen(17113, function(error) {
+		server = app.listen(17113, function(error) {
 			if (error) throw error;
 
 			let postData = JSON.stringify({
@@ -702,7 +716,7 @@ describe('JSONRPCInterface', function() {
 			return waiter.reject(error);
 		});
 
-		request.post('/v1/jsonrpc')
+		superRequest.post('/v1/jsonrpc')
 			.send({
 				method: 'ez.route',
 				params: {}
@@ -741,7 +755,7 @@ describe('JSONRPCInterface', function() {
 			return waiter.reject(error);
 		});
 
-		request.post('/v1/jsonrpc')
+		superRequest.post('/v1/jsonrpc')
 			.send({
 				method: 'ez.route.stream',
 				params: {}
@@ -769,6 +783,45 @@ describe('JSONRPCInterface', function() {
 				error: null
 			}
 		);
+	});
+
+	it('should trigger connection-closed hook on context', function(done) {
+		let spy = sinon.spy();
+
+		router.register({ method: 'do.the.thing' }, (ctx) => {
+			ctx.hook('connection-closed', spy);
+
+			// Will wait indefinitely until aborted.
+			return pasync.waiter().promise;
+		});
+
+		// Real life request!
+		server = app.listen(17113, function(error) {
+			if (error) throw error;
+
+			let req = request({
+				method: 'POST',
+				uri: 'http://localhost:17113/v1/jsonrpc',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					method: 'do.the.thing',
+					params: {}
+				})
+			}, () => {
+				throw new Error('Request should have been aborted.');
+			});
+
+			setTimeout(() => {
+				req.abort();
+
+				setTimeout(() => {
+					expect(spy).to.be.calledOnce;
+					done();
+				}, 100);
+			}, 100);
+		});
 	});
 
 });
