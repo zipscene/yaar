@@ -32,7 +32,7 @@ const setupRouter = () => {
 };
 
 const promisifyRequest = (endpoint, options, expectedResponse) => {
-	if (!options) throw new XError(XError.INVALID_REQUEST, `No options specified`);
+	if (!options) throw new XError(XError.INVALID_REQUEST, 'No options specified');
 
 	if (_.isUndefined(expectedResponse)) expectedResponse = {};
 	if (!_.isNumber(options.status)) options.status = 200;
@@ -258,7 +258,7 @@ describe('JSONRPCInterface', function() {
 		}, {
 			error: {
 				code: 'not_found',
-				message: `method: version-specific doesn't exist`
+				message: 'method: version-specific doesn\'t exist'
 			},
 			id: 'someId',
 			result: null
@@ -321,7 +321,7 @@ describe('JSONRPCInterface', function() {
 			}, {
 				error: {
 					code: 'not_found',
-					message: `method: single doesn't exist`
+					message: 'method: single doesn\'t exist'
 				},
 				id: 'id2',
 				result: null
@@ -356,7 +356,7 @@ describe('JSONRPCInterface', function() {
 			}, {
 				error: {
 					code: 'not_found',
-					message: `method: ranges doesn't exist`
+					message: 'method: ranges doesn\'t exist'
 				},
 				id: 'id6',
 				result: null
@@ -375,7 +375,7 @@ describe('JSONRPCInterface', function() {
 			}, {
 				error: {
 					code: 'not_found',
-					message: `method: ranges doesn't exist`
+					message: 'method: ranges doesn\'t exist'
 				},
 				id: 'id8',
 				result: null
@@ -402,7 +402,7 @@ describe('JSONRPCInterface', function() {
 			}, {
 				error: {
 					code: 'not_found',
-					message: `method: open.ranges doesn't exist`
+					message: 'method: open.ranges doesn\'t exist'
 				},
 				id: 'id11',
 				result: null
@@ -437,7 +437,7 @@ describe('JSONRPCInterface', function() {
 			}, {
 				error: {
 					code: 'not_found',
-					message: `method: everything.ever doesn't exist`
+					message: 'method: everything.ever doesn\'t exist'
 				},
 				id: 'id15',
 				result: null
