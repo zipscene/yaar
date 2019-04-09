@@ -1,6 +1,6 @@
 {
   "name": "yaar",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Yet Another API Router",
   "main": "./lib/index.js",
   "repository": {
