@@ -137,7 +137,7 @@ const registerMockModel = (opts = {}) => {
 
 };
 
-describe.only('RESTSimpleInterface', function() {
+describe('RESTSimpleInterface', function() {
 	beforeEach(setupRouter);
 
 	afterEach(function(done) {
