@@ -243,6 +243,29 @@ describe('RESTSimpleInterface', function() {
 		});
 	});
 
+	it('manual rest route', function() {
+		router.register({
+			method: 'foo.bar',
+			schema: createSchema({
+				foo: String,
+				bar: String,
+				baz: String
+			}),
+			rest: {
+				verb: 'POST',
+				route: '/foobar/:baz',
+				params: [ 'route', 'body', 'qs' ]
+			}
+		}, (ctx) => {
+			return ctx.params;
+		});
+		return testrest('post', '/v1/rest/foobar/xyz?foo=abc', { bar: 'fgh' }, (res) => {
+			expect(res.foo).to.equal('abc');
+			expect(res.bar).to.equal('fgh');
+			expect(res.baz).to.equal('xyz');
+		});
+	});
+
 });
 
 
