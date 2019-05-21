@@ -29,6 +29,8 @@ const setupRouter = () => {
 	app.use(router.getExpressRouter());
 
 	router.version(1).addInterface(new RESTSimpleInterface());
+
+	router.registerAPIInfoRoute();
 };
 
 const testrest = (verb, qstring, body, expectedResponse, expectedCode = 200) => {
@@ -265,6 +267,7 @@ describe('RESTSimpleInterface', function() {
 			expect(res.baz).to.equal('xyz');
 		});
 	});
+
 
 });
 
