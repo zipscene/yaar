@@ -71,7 +71,11 @@ const registerMockModel = (opts = {}) => {
 	let mockModel = {
 		getKeys() {
 			return keys;
-		}
+		},
+		getName() {
+			return name;
+		},
+		name: name
 	};
 
 	router.register({
