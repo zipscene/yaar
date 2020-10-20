@@ -309,7 +309,7 @@ describe('JSONRPCInterface', function() {
 
 		return promisifyRequest('/v1/jsonrpc', {
 			method: 'single',
-			id: 1
+			id: '1'
 		}, {
 			result: true,
 			id: '1',
@@ -650,7 +650,7 @@ describe('JSONRPCInterface', function() {
 			stream.on('chainerror', (error) => {
 				waiter.reject(error);
 			});
-			stream.on('end', () => {
+			stream.on('finish', () => {
 				waiter.resolve();
 			});
 			stream.write({ foo: 'YATTA' });
